@@ -27,9 +27,9 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     user = update.effective_user
 
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    filename = f"UserId_{user.id}_activity_log.txt"
-    with open(filename, "a", encoding="utf-8") as file:
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")       # read the time stamp for logs
+    filename = f"UserId_{user.id}_activity_log.txt"                         # filename with user ID 
+    with open(filename, "a", encoding="utf-8") as file:                     # log user message to filename 
         file.write(
             f"{timestamp} | {user.id} | {user.first_name} | {text}\n"
         )

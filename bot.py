@@ -1,71 +1,30 @@
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
+from telegram.ext import ApplicationBuilder, MessageHandler,CommandHandler, filters, ContextTypes
 import datetime
+import sqlite3
+import DBHandler
+import messageHandler
+import commandHandler
+from telegram.ext import CallbackQueryHandler
 
 #configuration section
 TOKEN = "8601111376:AAHfAgJ7HAsm6zO2RqTIeeyysE0YGnp7CUM"
+DBHandler.create_tables()
 
-#Menu
-keyboard = [
-    ["Кнопка 1"],
-    ["Кнопка 2"],
-    ["Кнопка 3"]
-]
+#DBHandler.add_user(12345, "testName", "Admin")
 
-reply_markup = ReplyKeyboardMarkup(
-    keyboard,
-    resize_keyboard=True
-)
-
-
-
-
-
-
-# message handler
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = update.message.text
-    user = update.effective_user
-
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")       # read the time stamp for logs
-    filename = f"UserId_{user.id}_activity_log.txt"                         # filename with user ID 
-    with open(filename, "a", encoding="utf-8") as file:                     # log user message to filename 
-        file.write(
-            f"{timestamp} | {user.id} | {user.first_name} | {text}\n"
-        )
-
-    await update.message.reply_text(
-    f"Привет, {user.first_name}!"
-    f"Твой UserID, {user.id}!"
-)
-
-    await context.bot.send_message(
-    chat_id=user.id,  # вставить ID другого пользователя
-    text=f"{user.first_name} только что написал боту!"
-)
-    
-    
-
-    if text == "Кнопка 1":
-        await update.message.reply_text("Ты нажал кнопку 1")
-    elif text == "Кнопка 2":
-        await update.message.reply_text("Это ответ для кнопки 2")
-    elif text == "Кнопка 3":
-        await update.message.reply_text("Вот сообщение для кнопки 3")
-    else:
-        await update.message.reply_text(
-            "Выбери кнопку:",
-            reply_markup=reply_markup
-        )
-
-
-
+user = DBHandler.get_user_by_telegram_id(123456)
 
 
 
 #main app loop
+
+
 app = ApplicationBuilder().token(TOKEN).build()
 
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, menu))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, messageHandler.message_handler))
+app.add_handler(CommandHandler("ShowUsers",commandHandler.show_users_handler ))
+app.add_handler(CallbackQueryHandler(messageHandler.button_handler))
 
 app.run_polling()
+

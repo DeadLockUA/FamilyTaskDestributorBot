@@ -3,22 +3,9 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from communication_handler import log,send_to_user
+from globalVariables import task_creation_states,task_selection_states,user_states
 
-user_states = {                                                             #Store information about current user state and information he provided
-    12345: {
-        "task": "CREATE_TASK",
-        "step": "WAITING_FOR_TASK_NAME",
-        "task_data": {
-            "title":"TemplateTask",
-            "owner_id": 22222,
-            "creator_id" : 12345,
-            "deadline":"01.01.2027",
-            "status" : 0,
-            "priority" : 5,
 
-        }
-    }
-}
 
 
 #Task should contain:
@@ -33,20 +20,6 @@ user_states = {                                                             #Sto
 async def reset_user_states (user_id: int):
     del user_states[user_id]
     
-
-
-task_selection_states = (                                                   #Task in progress
-    "CREATE_TASK",
-    "MY_TASKS"
-)
-
-task_creation_states = (                                                    #Steps in sequence to create tasks
-    "WAITING_FOR_TASK_NAME",
-    "WAITING_FOR_RESPONSIBLE",
-    "WAITING_FOR_DEADLINE",
-    "WAITING_FOR_PRIORITY"
-)
-
 
 async def message_handler_default(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id

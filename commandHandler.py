@@ -2,7 +2,7 @@ import DBHandler
 from telegram import Update
 from telegram.ext import ContextTypes
 
-async def show_users_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def show_users_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
     
     users = DBHandler.get_all_users()
 

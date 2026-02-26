@@ -3,11 +3,11 @@ This is a telegram bot to share and destribute tasks in the family. Perform some
 
 # Goals, requirements and tasks
 
-1. Create a database to store information from users:
+1. [Done]Create a database to store information from users:
    
-   a.Learn and install SQLite.
+   a.[Done]Learn and install SQLite.
    
-   b.Information template should contain:
+   b.[Done]Information template should contain:
      * Unique User Id
      * Task name / Timestamp / Description / Deadline / Status / Owner / Priority
   

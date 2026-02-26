@@ -22,7 +22,7 @@ user = DBHandler.get_user_by_telegram_id(123456)
 
 app = ApplicationBuilder().token(TOKEN).build()
 
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, messageHandler.message_handler))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, messageHandler.message_handler_default))
 app.add_handler(CommandHandler("ShowUsers",commandHandler.show_users_handler ))
 app.add_handler(CallbackQueryHandler(messageHandler.button_handler))
 

@@ -4,5 +4,5 @@ from telegram import Update
 def log(someText):
     print(f"{datetime.now()} {someText}")
 
-def send_to_user (update: Update,text:str)
+async def send_to_user (update: Update,text:str):
     await update.message.reply_text(text)

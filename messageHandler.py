@@ -2,7 +2,7 @@ import DBHandler
 from telegram import Update,ReplyKeyboardMarkup
 from telegram.ext import ContextTypes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from communication_handler import log
+from communication_handler import log,send_to_user
 
 user_states = {                                                             #Store information about current user state and information he provided
     12345: {
@@ -50,8 +50,8 @@ task_creation_states = (                                                    #Ste
 
 async def message_handler_default(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    if not DBHandler.get_user_by_telegram_id(user_id):                                                  #If user is unknown - register gim into DB
-        await update.message.reply_text("You are here first time? Welcome! For more details type /Start")
+    if not DBHandler.get_user_by_telegram_id(user_id):                          #If user is unknown - register gim into DB
+        await send_to_user(update, "You are here first time? Welcome! For more details type /Start")                    
         log(f"New user detected. Registering new user: {user_id}, {update.effective_user.full_name} as regular user")
         DBHandler.add_user(user_id, update.effective_user.full_name, "User")
     
@@ -67,9 +67,10 @@ async def message_handler_default(update: Update, context: ContextTypes.DEFAULT_
         await reset_dialog (update,context,"Please, select desired action")
 
 
+
 async def reset_dialog(update: Update, context: ContextTypes.DEFAULT_TYPE, reset_dialog_request:str):
     log("resetting dialog")
-    await update.message.reply_text(reset_dialog_request)
+    await send_to_user(update,reset_dialog_request)
     log("sending dialog window")
     await show_menu (update,context)
 
@@ -86,6 +87,7 @@ async def process_user_dialog (update: Update, context: ContextTypes.DEFAULT_TYP
         log(f"Task {task} - is unknown. reseting dialog")
         await reset_dialog (update,context,"Something went wrong. Lets start from beginning.")
 
+
 async def process_task_creation_dialog (update: Update, context: ContextTypes.DEFAULT_TYPE, step: str):
     log ("processing process_task_creation_dialog dialog")
     user_id = update.effective_user.id
@@ -97,17 +99,34 @@ async def process_task_creation_dialog (update: Update, context: ContextTypes.DE
 
         if len(user_text) < 5 or len(user_text) > 30:
             log(f"Improper name length, requesting again")
-            await update.message.reply_text("Task name should be longe 5 and shorter then 50 symbols")
+            await send_to_user(update,"Task name should be longer then 5 and shorter then 50 symbols")
         else:
-            log(f"Updating states")
+            log(f"Updating states. Task_data.title = {user_text}")
             user_states[user_id]["task_data"]["title"] = user_text
             user_states[user_id]["step"] = task_creation_states[1]
-            log(f"requesting for responsible")
-            await update.message.reply_text("Please, enter responsible:")
+            log(f"requesting for responsible")         
+
+            list_of_resposibles = [
+            InlineKeyboardButton(
+                user["name"],                 # button text
+                callback_data="select_responsible/"+str(user["telegram_id"]) # callback must be string!
+                ) for user in DBHandler.get_all_users()
+            ]
+
+            keyboard = [
+                list_of_resposibles,
+                [
+                    InlineKeyboardButton("❓ Help", callback_data="/help"),
+                    InlineKeyboardButton("📋 return to Menu", callback_data="/start")
+                ]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.message.reply_text("Please, select responsible:", reply_markup=reply_markup)
 
 
     elif step == task_creation_states[1]:         #WAITING_FOR_RESPONSIBLE
         log(f"Step {step} - Processing WAITING_FOR_RESPONSIBLE")
+        log(f"Assigned responsible = {user_text}")
     elif step == task_creation_states[2]:         #WAITING_FOR_DEADLINE
         log(f"Step {step} - Processing WAITING_FOR_DEADLINE")
     elif step == task_creation_states[3]:         #WAITING_FOR_PRIORITY
@@ -140,10 +159,7 @@ async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await update.message.reply_text(
-        "Choose an option:",
-        reply_markup=reply_markup
-    )
+    await update.message.reply_text("Choose an option:", reply_markup=reply_markup)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -154,6 +170,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     data = query.data
 
+    log(f"Button_Pressed: {data}")
     if data == "create_task":
         log("Starting to handle create_task button")
         user_id = update.effective_user.id

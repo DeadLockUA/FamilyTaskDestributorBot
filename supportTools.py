@@ -6,13 +6,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 def log(someText):
     print(f"{datetime.now()} {someText}")
 
-
 async def send_to_user(update: Update, text: str):
-    if update.message:
-        await update.message.reply_text(text)
-    elif update.callback_query:
-        await update.callback_query.message.reply_text(text)
-
+    await update.effective_chat.send_message(text)
 
 def parse_deadline(user_input: str):
     user_input = user_input.strip().lower()

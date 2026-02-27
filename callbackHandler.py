@@ -21,9 +21,17 @@ async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
     #Here are actions for main menu buttons:
     if action == "create_task":
         log("action create_task") 
-        await create_task(update)       
+        await create_task(update)  
 
-    elif action == "my_tasks":
+    #check if user is already in a dialog state
+    log("Checking user_states")
+    user_id = update.effective_user.id
+    if user_id not in user_states:
+        await messageHandler.reset_dialog (update)
+        return
+         
+
+    if action == "my_tasks":
         await query.edit_message_text("Here are your tasks 📋")
 
     #Below are actions on responsible selection during creation of task

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from telegram import Update
 import re
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 def log(someText):
     print(f"{datetime.now()} {someText}")
@@ -46,3 +47,20 @@ def parse_deadline(user_input: str):
 
     # --- INVALID FORMAT ---
     return None
+
+
+def get_main_menu_markup():
+    """
+    Returns the main menu inline keyboard markup.
+    """
+    keyboard = [
+        [
+            InlineKeyboardButton("👥 Assign new task", callback_data="create_task"),
+            InlineKeyboardButton("📋 My Tasks",      callback_data="my_tasks"),
+        ],
+        [
+            InlineKeyboardButton("❓ Help", callback_data="help"),
+        ]
+    ]
+    
+    return InlineKeyboardMarkup(keyboard)

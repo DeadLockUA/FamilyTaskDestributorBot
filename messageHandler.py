@@ -2,9 +2,8 @@ import DBHandler
 from telegram import Update
 from telegram.ext import ContextTypes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from supportTools import log,send_to_user,parse_deadline
+from supportTools import log,send_to_user,parse_deadline,get_main_menu_markup
 from globalVariables import task_creation_states,task_selection_states,user_states
-from datetime import datetime, timedelta
 
 
 
@@ -44,13 +43,17 @@ async def message_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
         await reset_dialog (update)
 
 
-
-async def reset_dialog(update: Update, reset_dialog_request:str = ""):
+async def reset_dialog(update: Update, reset_dialog_request: str = ""):
     log("resetting dialog. Sending new dialog window")
-    if reset_dialog_request != "":
-        await send_to_user(update,reset_dialog_request)
     
-    await show_menu (update)
+    # Resetting user state safely.
+    user_states.pop(update.effective_user.id, None)
+    
+    if reset_dialog_request:
+        #FUTURE IMPROVEMENT: send_to_user have to support effective_chat / effective_user
+        await send_to_user(update, reset_dialog_request)    
+
+    await update.effective_chat.send_message(text="Select option:", reply_markup=get_main_menu_markup())
 
 
 async def process_user_dialog (update: Update, task: str, step: str):
@@ -166,26 +169,6 @@ async def process_my_tasks_dialog (update: Update, step: str):
     log ("processing process_my_tasks_dialog dialog")
 
 
-
-
-
-async def show_menu(update: Update):
-
-    user_states.pop(update.effective_user.id, None)
-
-    keyboard = [
-        [
-            InlineKeyboardButton("👥 Assign new task", callback_data="create_task"),
-            InlineKeyboardButton("📋 My Tasks", callback_data="my_tasks")
-        ],
-        [
-            InlineKeyboardButton("❓ Help", callback_data="help")
-        ]
-    ]
-
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text("Choose an option:", reply_markup=reply_markup)
 
     
 

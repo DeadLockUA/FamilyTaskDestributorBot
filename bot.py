@@ -4,6 +4,7 @@ import DBHandler
 import messageHandler
 import commandHandler
 import callbackHandler
+from  supportTools import log
 from telegram.ext import CallbackQueryHandler
 
 #configuration section
@@ -18,8 +19,9 @@ user = DBHandler.get_user_by_telegram_id(123456)
 
 #main app loop
 
-
+log("Starting Bot")
 app = ApplicationBuilder().token(TOKEN).build()
+log("Bot is up and running. Waiting for user requests............")
 
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, messageHandler.message_handler))
 app.add_handler(CommandHandler("ShowUsers",commandHandler.show_users_handler ))

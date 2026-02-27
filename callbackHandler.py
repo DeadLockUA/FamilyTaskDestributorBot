@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from supportTools import log,send_to_user
 from globalVariables import task_creation_states,task_selection_states,user_states
+from DBHandler import get_tasks_by_user_id,get_user_name_by_telegram_id
 
 
 async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
@@ -30,7 +31,7 @@ async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
             await create_task(update)  
         elif action == "my_tasks":
             log("action my_tasks") 
-            await query.edit_message_text("Here are your tasks 📋")
+            await get_my_tasks(update)
         else:
             log("unknown action") 
             await messageHandler.reset_dialog (update)
@@ -58,6 +59,60 @@ async def create_task(update: Update):
         "task_data": {}
     }
     await update.callback_query.edit_message_text("Creating new task. Please enter task name:")
+
+#async def get_my_tasks (update: Update):
+
+async def get_my_tasks(update: Update):
+    user_id = update.effective_user.id
+    tasks = get_tasks_by_user_id(user_id)
+
+    if not tasks:
+        await send_to_user(
+            update,
+            "📭 You don't have any tasks assigned to you at the moment."
+        )
+        return
+
+    # Prepare message
+    lines = ["📋 **Your tasks:**\n"]
+
+    for task in tasks:
+        task_id     = task['id']
+        title       = task['title']
+        creator_id  = task['creator_id']
+        deadline    = task['deadline'] or "—"
+        status      = task['status']
+        priority    = task['priority']
+
+        # Get creator's name (using your existing helper)
+        creator_name = get_user_name_by_telegram_id(creator_id)
+
+        # Priority emoji
+        priority_emojis = ["🔴", "🟠", "🟡", "🟢", "🔵"]
+        prio_emoji = priority_emojis[min(priority, 4)] if priority is not None else "⚪"
+
+        # Simple status text – customize as you wish
+        status_text = {
+            0: "🆕 New",
+            1: "🔄 In progress",
+            2: "✅ Completed",
+            3: "❌ Cancelled",
+        }.get(status, f"Status {status}")
+
+        # One task line
+        line = (
+            f"#{task_id}  {prio_emoji} **{title}**\n"
+            f"   • From: {creator_name}\n"
+            f"   • Deadline: {deadline}\n"
+            f"   • {status_text}\n"
+        )
+        lines.append(line)
+
+    # Final message
+    message = "\n".join(lines).strip()
+
+    await send_to_user(update, message)
+
 
 
 

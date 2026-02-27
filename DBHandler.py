@@ -131,3 +131,28 @@ def get_tasks_by_user_id(owner_id):
     conn.close()
 
     return tasks
+
+#Clear DB activities:
+
+def clear_all_users():
+    """Deletes ALL records from the 'users' table"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users")
+    conn.commit()
+    conn.close()
+
+
+def clear_all_tasks():
+    """Deletes ALL records from the 'tasks' table"""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks")
+    conn.commit()
+    conn.close()
+
+
+def clear_all_data():
+    """Deletes everything from both tables"""
+    clear_all_users()
+    clear_all_tasks()

@@ -12,6 +12,7 @@ TOKEN = "8601111376:AAHfAgJ7HAsm6zO2RqTIeeyysE0YGnp7CUM"
 DBHandler.create_tables()
 
 #DBHandler.add_user(12345, "testName", "Admin")
+#DBHandler.add_user(123456, "testName2", "Admin")
 
 
 #main app loop

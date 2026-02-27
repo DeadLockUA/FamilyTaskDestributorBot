@@ -24,11 +24,21 @@ async def reset_user_states (user_id: int):
 async def message_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
-    #register new user if not in DB
-    if not DBHandler.get_user_name_by_telegram_id(user_id):                          
-        await send_to_user(update, "You are here first time? Welcome! For more details type /Start")                    
-        log(f"New user detected. Registering new user: {user_id}, {update.effective_user.full_name} as regular user")
+    # #register new user if not in DB
+    # if not DBHandler.get_user_name_by_telegram_id(user_id):                          
+    #     await send_to_user(update, "You are here first time? Welcome! For more details type /Start")                    
+    #     log(f"New user detected. Registering new user: {user_id}, {update.effective_user.full_name} as regular user")
+    #     DBHandler.add_user(user_id, update.effective_user.full_name, "User")
+
+    
+    user_name = DBHandler.get_user_name_by_telegram_id(user_id)
+    if user_name == "Unknown user":
+        # this is a new user
+        await send_to_user(update, "You are here first time? Welcome! ...")
+        log(f"New user detected: {user_id} ...")
         DBHandler.add_user(user_id, update.effective_user.full_name, "User")
+
+
     
     #check if user is already in a dialog state
     log("Checking user_states")

@@ -64,18 +64,21 @@ def add_user(telegram_id, name, role):
     conn.commit()
     conn.close()
 
-def get_user_by_telegram_id(telegram_id):
+def get_user_name_by_telegram_id(telegram_id):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT * FROM users WHERE telegram_id = ?
+        SELECT name FROM users WHERE telegram_id = ?
     """, (telegram_id,))
 
-    user = cursor.fetchone()
+    result = cursor.fetchone()
     conn.close()
 
-    return user
+    if result is None:
+        return "Unknown user"          
+
+    return result[0]
 
 def get_all_users():        #For debuging and admin purposes
     conn = get_connection()

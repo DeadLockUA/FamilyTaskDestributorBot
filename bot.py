@@ -13,9 +13,6 @@ DBHandler.create_tables()
 
 #DBHandler.add_user(12345, "testName", "Admin")
 
-user = DBHandler.get_user_by_telegram_id(123456)
-
-
 
 #main app loop
 

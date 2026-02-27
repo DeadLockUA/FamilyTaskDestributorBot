@@ -25,7 +25,7 @@ async def message_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     #register new user if not in DB
-    if not DBHandler.get_user_by_telegram_id(user_id):                          
+    if not DBHandler.get_user_name_by_telegram_id(user_id):                          
         await send_to_user(update, "You are here first time? Welcome! For more details type /Start")                    
         log(f"New user detected. Registering new user: {user_id}, {update.effective_user.full_name} as regular user")
         DBHandler.add_user(user_id, update.effective_user.full_name, "User")

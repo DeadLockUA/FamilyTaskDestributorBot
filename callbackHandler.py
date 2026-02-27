@@ -8,7 +8,7 @@ from globalVariables import task_creation_states,task_selection_states,user_stat
 
 async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
 
-    log("Entering button_handler")
+    log("Entering callback_handler")
     query = update.callback_query
 
     await query.answer()  
@@ -18,31 +18,35 @@ async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
 
     log(f"Button_Pressed: {data}")
 
-    #Here are actions for main menu buttons:
-    if action == "create_task":
-        log("action create_task") 
-        await create_task(update)  
 
     #check if user is already in a dialog state
     log("Checking user_states")
     user_id = update.effective_user.id
     if user_id not in user_states:
-        await messageHandler.reset_dialog (update)
-        return
-         
+        log("user_id not in user_states") 
 
-    if action == "my_tasks":
-        await query.edit_message_text("Here are your tasks 📋")
+        if action == "create_task":
+            log("action create_task") 
+            await create_task(update)  
+        elif action == "my_tasks":
+            log("action my_tasks") 
+            await query.edit_message_text("Here are your tasks 📋")
+        else:
+            log("unknown action") 
+            await messageHandler.reset_dialog (update)
+    else:
+        log("user_id is in user_states") 
 
-    #Below are actions on responsible selection during creation of task
+        if action == "set_responsible":
+            log("action set_responsible") 
+            await set_responsible(update,data.split("/")[1])
 
-    elif action == "set_responsible":
-        log("action set_responsible") 
-        await set_responsible(update,data.split("/")[1])
-
-    elif action == "set_priority":
-        log("action set_priority") 
-        await set_priority(update,data.split("/")[1]) 
+        elif action == "set_priority":
+            log("action set_priority") 
+            await set_priority(update,data.split("/")[1]) 
+        else:
+            log("unknown action") 
+            await messageHandler.reset_dialog (update)
 
 
 async def create_task(update: Update):
@@ -63,7 +67,7 @@ async def set_responsible(update: Update,  responsible:str):
     user_id = update.effective_user.id
     user_states[user_id]["task_data"]["owner_id"] = responsible
     user_states[user_id]["step"] = task_creation_states[2] #setting state to WAITING_FOR_DEADLINE
-    await update.callback_query.edit_message_text(f"Task is assigned to: {DBHandler.get_user_by_telegram_id(responsible)['name']}")
+    await update.callback_query.edit_message_text(f"Task is assigned to: {DBHandler.get_user_name_by_telegram_id(responsible)}")
     await send_to_user(update,f"Please set a deadline:")
 
 async def set_priority (update: Update,  priority:str):
@@ -78,13 +82,10 @@ async def set_priority (update: Update,  priority:str):
     #Now finish creating task!
     task_data = user_states[user_id]['task_data']
 
-    log(f"""Creating task with next parameters
-    {task_data['title']}
-    {task_data['owner_id']}
-    {user_id}
-    {task_data['deadline']}
-    {task_data['priority']}
-    """)
+    #log(f"""Creating task with next parameters
+    #{task_data['title']}, {task_data['owner_id']}, {user_id},{task_data['deadline']},{task_data['priority']}""")
+
+    log(", ".join(f"{key}: {value}" for key, value in task_data.items()))    
 
     DBHandler.add_task(
         task_data['title'],
@@ -94,6 +95,14 @@ async def set_priority (update: Update,  priority:str):
         task_data['priority']
     )
     user_states.pop(update.effective_user.id, None)
-    await send_to_user (update,"Task created and assigned successfully 😁")
 
-
+    task_summary=f"""Task summary
+    📋Task title: " {task_data['title']}
+    👥For whom: {DBHandler.get_user_name_by_telegram_id(task_data['owner_id'])}
+    ⌛Deadline: {str(task_data['deadline']).split('.')[0]}
+    🏃‍♂️‍➡️Priority: {task_data['priority']}
+    
+    Task created and assigned successfully 😁
+    """
+    await send_to_user (update,task_summary)
+    await messageHandler.reset_dialog(update, "What would you like to do next?")

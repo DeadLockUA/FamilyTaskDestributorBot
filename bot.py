@@ -1,4 +1,5 @@
 from telegram import Update, ReplyKeyboardMarkup
+from botToken import TOKEN #import token for your telegram bot. 
 from telegram.ext import ApplicationBuilder, MessageHandler,CommandHandler, filters, ContextTypes
 import DBHandler
 import messageHandler
@@ -9,7 +10,6 @@ from telegram.ext import CallbackQueryHandler
 from globalVariables import logger
 
 #configuration section
-TOKEN = "8601111376:AAHfAgJ7HAsm6zO2RqTIeeyysE0YGnp7CUM"
 DBHandler.create_tables()
 
 #DBHandler.add_user(12345, "testName", "Admin")

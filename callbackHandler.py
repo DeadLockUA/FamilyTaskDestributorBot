@@ -8,6 +8,7 @@ from DBHandler import get_tasks_by_user_id,get_user_name_by_telegram_id,get_open
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from supportTools import log,send_to_user,get_task_menu_markup,get_support_menu_markup
 from commandHandler import show_help_menu
+from notificationHandler import send_message_by_user_id
 
 
 
@@ -280,13 +281,29 @@ async def set_priority (update: Update,  priority:str):
     )
     user_states.pop(update.effective_user.id, None)
 
-    task_summary=f"""Task summary
-    📋Task title: " {task_data['title']}
-    👥For whom: {DBHandler.get_user_name_by_telegram_id(task_data['owner_id'])}
-    ⌛Deadline: {str(task_data['deadline']).split('.')[0]}
-    🏃‍♂️‍➡️Priority: {task_data['priority']}
+    title =task_data['title']
+    owner_id = task_data['owner_id']
+    owner_name = DBHandler.get_user_name_by_telegram_id(owner_id)
     
-    Task created and assigned successfully 😁
-    """
-    await send_to_user (update,task_summary)
+    deadline = str(task_data['deadline']).split('.')[0]
+
+    task_summary=f"📋Task title: {title}\n👥For whom: {owner_name}\n⌛Deadline: {deadline}\n 🏃‍♂️‍➡️Priority: {priority}"
+
+    message_for_creator=f"Task summary\n\n{task_summary}\n\n Task created and assigned successfully 😁"
+    await send_to_user (update,message_for_creator)
     await messageHandler.reset_dialog(update, "What would you like to do next?")
+
+    message_for_owner=f"New task for you:\n\n {task_summary}"
+
+    success = await send_message_by_user_id(
+    user_id=owner_id,           # ← your internal owner_id
+    text=message_for_owner,
+    # reply_markup=some_inline_button_markup,  # optional
+)
+
+    if success:
+        logger.info(f"Owner {owner_name}({owner_id}) notified about new task: {title}")
+    else:
+        logger.warning(f"Failed to notify owner {owner_name}({owner_id})")
+
+

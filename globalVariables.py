@@ -1,3 +1,15 @@
+
+import logging
+
+# One-time configuration 
+logging.basicConfig(
+    level=logging.WARNING,                     
+    #format='%(asctime)s  %(levelname)-7s  %(name)s  %(filename)s:%(lineno)d  %(funcName)s()  →  %(message)s',
+    format='%(asctime)s %(filename)s:%(lineno)d  →  %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
+
 task_selection_states = (                                                   #Task in progress
     "CREATE_TASK",
     "MY_TASKS"
@@ -5,6 +17,7 @@ task_selection_states = (                                                   #Tas
 
 task_creation_states = (                                                    #Steps in sequence to create tasks
     "WAITING_FOR_TASK_NAME",
+    "WAITING_FOR_TASK_DESCRIPTION"
     "WAITING_FOR_RESPONSIBLE",
     "WAITING_FOR_DEADLINE",
     "WAITING_FOR_PRIORITY"

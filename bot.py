@@ -6,6 +6,7 @@ import commandHandler
 import callbackHandler
 from  supportTools import log
 from telegram.ext import CallbackQueryHandler
+from globalVariables import logger
 
 #configuration section
 TOKEN = "8601111376:AAHfAgJ7HAsm6zO2RqTIeeyysE0YGnp7CUM"
@@ -16,13 +17,14 @@ DBHandler.create_tables()
 
 
 #main app loop
-
-log("Starting Bot")
+logger.info("Starting Bot")
 app = ApplicationBuilder().token(TOKEN).build()
 log("Bot is up and running. Waiting for user requests............")
 
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, messageHandler.message_handler))
 app.add_handler(CommandHandler("ShowUsers",commandHandler.show_users_handler ))
+app.add_handler(CommandHandler("Start",commandHandler.start_dialog_handler ))
+app.add_handler(CommandHandler("Help",commandHandler.show_help_menu ))
 app.add_handler(CallbackQueryHandler(callbackHandler.button_handler))
 
 app.run_polling()

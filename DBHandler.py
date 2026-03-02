@@ -39,6 +39,7 @@ def create_tables():
     CREATE TABLE IF NOT EXISTS tasks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
+        description TEXT,
         owner_id INTEGER,
         creator_id INTEGER,
         deadline TEXT,
@@ -93,14 +94,14 @@ def get_all_users():        #For debuging and admin purposes
 
 
 
-def add_task(title, owner_id, creator_id, deadline, priority):
+def add_task(title,description, owner_id, creator_id, deadline, priority):
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO tasks (title, owner_id, creator_id, deadline, status, priority)
-    VALUES (?, ?, ?, ?, ?, ?)
-    """, (title, owner_id, creator_id, deadline, 0 , priority))
+    INSERT INTO tasks (title,description, owner_id, creator_id, deadline, status, priority)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (title,description, owner_id, creator_id, deadline, 0 , priority))
 
     conn.commit()
     conn.close()
@@ -118,6 +119,20 @@ def update_task_status(task_id, new_status):
     conn.commit()
     conn.close()
 
+def get_task_by_task_id(task_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM tasks 
+        WHERE id = ?
+    """, (task_id,))
+
+    task = cursor.fetchone()
+    conn.close()
+    
+    return task  
+
 
 def get_tasks_by_user_id(owner_id):
     conn = get_connection()
@@ -131,6 +146,24 @@ def get_tasks_by_user_id(owner_id):
     conn.close()
 
     return tasks
+
+def get_open_tasks_by_user_id(owner_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM tasks 
+        WHERE owner_id = ? 
+          AND status = 0
+    """, (owner_id,))
+
+    tasks = cursor.fetchall()
+    conn.close()
+
+    return tasks
+
+
+
 
 #Clear DB activities:
 

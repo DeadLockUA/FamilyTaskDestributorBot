@@ -75,19 +75,19 @@ def get_priority_markup():
     #Returns the full main menu, including support row
     keyboard = [
         [
-            InlineKeyboardButton("🔴 0 - Super Urgent", callback_data="set_priority/0"),
+            InlineKeyboardButton("🔴 0 - Super Urgent", callback_data="set_priority:0"),
         ],
         [
-            InlineKeyboardButton("🟠 1 - High", callback_data="set_priority/1"),
+            InlineKeyboardButton("🟠 1 - High", callback_data="set_priority:1"),
         ],
         [
-            InlineKeyboardButton("🟡 2 - Medium", callback_data="set_priority/2"),
+            InlineKeyboardButton("🟡 2 - Medium", callback_data="set_priority:2"),
         ],
         [
-            InlineKeyboardButton("🟢 3 - Low", callback_data="set_priority/3"),
+            InlineKeyboardButton("🟢 3 - Low", callback_data="set_priority:3"),
         ],
         [
-            InlineKeyboardButton("🔵 4 - Relaxed", callback_data="set_priority/4")
+            InlineKeyboardButton("🔵 4 - Relaxed", callback_data="set_priority:4")
         ],
         # Reuse the support row upacked
         *get_support_menu_markup().inline_keyboard 

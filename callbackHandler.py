@@ -7,6 +7,7 @@ from globalVariables import task_creation_states,task_selection_states,user_stat
 from DBHandler import get_tasks_by_user_id,get_user_name_by_telegram_id,get_open_tasks_by_user_id,get_task_by_task_id
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from supportTools import log,send_to_user,get_task_menu_markup,get_support_menu_markup
+from commandHandler import show_help_menu
 
 
 
@@ -18,7 +19,7 @@ async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
     await query.answer()  
 
     data = query.data
-    action = data.split("/")[0]
+    action = data.split(":")[0]
 
     logger.warning(f"Button_Pressed: {data}")
 
@@ -47,15 +48,18 @@ async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
 
         elif action == "change_task_status":
             logger.warning("action change_task_status") 
-            await change_task_status(update,data.split("/")[1])
+            await change_task_status(update,data.split(":")[1])
 
         elif action == "complete_task":
             logger.warning("action complete_task") 
-            await complete_task(update,data.split("/")[1])
+            await complete_task(update,data.split(":")[1])
         
         elif action == "review_task":
             logger.warning("action review_task") 
-            await review_task(update,data.split("/")[1])    
+            await review_task(update,data.split(":")[1])
+
+        elif action == "/help":
+            await show_help_menu(update)      
 
         else:
             logger.warning("unknown action") 
@@ -65,11 +69,11 @@ async def button_handler(update: Update,context: ContextTypes.DEFAULT_TYPE):
 
         if action == "set_responsible":
             logger.warning("action set_responsible") 
-            await set_responsible(update,data.split("/")[1])
+            await set_responsible(update,data.split(":")[1])
 
         elif action == "set_priority":
             logger.warning("action set_priority") 
-            await set_priority(update,data.split("/")[1]) 
+            await set_priority(update,data.split(":")[1]) 
         else:
             logger.warning("unknown action") 
             await messageHandler.reset_dialog (update)
@@ -163,7 +167,7 @@ async def show_my_task_list (update: Update):
     keyboard = []
     for task in tasks:
         title = task["title"]
-        callback_data="change_task_status/"+str(task["id"])
+        callback_data="change_task_status:"+str(task["id"])
         button = InlineKeyboardButton (text= title, callback_data= callback_data)
         keyboard.append([button])
 
@@ -187,8 +191,8 @@ async def change_task_status(update: Update,  taskId:str):
 
     keyboard = [
         [
-            InlineKeyboardButton("🔍 Review task", callback_data="review_task/"+taskId),
-            InlineKeyboardButton("✅ Finish task", callback_data="complete_task/"+taskId)
+            InlineKeyboardButton("🔍 Review task", callback_data="review_task:"+taskId),
+            InlineKeyboardButton("✅ Finish task", callback_data="complete_task:"+taskId)
         ],
         *get_support_menu_markup().inline_keyboard 
     ]
@@ -220,7 +224,7 @@ async def review_task(update: Update,  taskId:str):
     keyboard = [
         [
             InlineKeyboardButton("⬅️ Back", callback_data="show_my_task_list"),
-            InlineKeyboardButton("✅ Finish task", callback_data="complete_task/"+taskId)
+            InlineKeyboardButton("✅ Finish task", callback_data="complete_task:"+taskId)
         ],
         # Reuse the support row upacked
         *get_support_menu_markup().inline_keyboard 

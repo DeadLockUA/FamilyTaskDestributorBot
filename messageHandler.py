@@ -111,7 +111,7 @@ async def process_task_creation_dialog (update: Update, step: str):
             list_of_resposibles = [
             InlineKeyboardButton(
                 user["name"],                 # button text
-                callback_data="set_responsible/"+str(user["telegram_id"]) # callback must be string!
+                callback_data="set_responsible:"+str(user["telegram_id"]) # callback must be string!
                 ) for user in DBHandler.get_all_users()
             ]
 
